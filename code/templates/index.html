@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>European Soccer Insights Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ European Soccer Insights</h1>
+            <p>MongoDB-Powered Analytics Dashboard</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" onclick="openTab('overview')">Overview</button>
+            <button class="tab-button" onclick="openTab('teams')">Teams</button>
+            <button class="tab-button" onclick="openTab('players')">Players</button>
+            <button class="tab-button" onclick="openTab('leagues')">Leagues</button>
+            <button class="tab-button" onclick="openTab('api')">API Docs</button>
+        </nav>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="section">
+                <h2>Database Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-matches">-</div>
+                        <div class="stat-label">Total Matches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-teams">-</div>
+                        <div class="stat-label">Teams</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-leagues">-</div>
+                        <div class="stat-label">Leagues</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>League Statistics</h2>
+                <button class="btn" onclick="loadLeagueStats()">Load League Stats</button>
+                <canvas id="leagueChart"></canvas>
+                <div id="league-stats-table"></div>
+            </div>
+
+            <div class="section">
+                <h2>Most Common Scorelines</h2>
+                <button class="btn" onclick="loadScorelines()">Load Scorelines</button>
+                <div id="scorelines-results"></div>
+            </div>
+        </div>
+
+        <!-- Teams Tab -->
+        <div id="teams" class="tab-content">
+            <div class="section">
+                <h2>Team Search</h2>
+                <div class="form-group">
+                    <label for="team-name">Team Name:</label>
+                    <input type="text" id="team-name" placeholder="e.g., FC Barcelona">
+                    <button class="btn" onclick="searchTeam()">Search Team</button>
+                </div>
+                <div id="team-results"></div>
+            </div>
+
+            <div class="section">
+                <h2>Team Season Statistics</h2>
+                <div class="form-group">
+                    <label for="season-team-name">Team Name:</label>
+                    <input type="text" id="season-team-name" placeholder="e.g., FC Barcelona">
+                </div>
+                <div class="form-group">
+                    <label for="season-select">Season:</label>
+                    <select id="season-select">
+                        <option value="2015/2016">2015/2016</option>
+                        <option value="2014/2015">2014/2015</option>
+                        <option value="2013/2014">2013/2014</option>
+                        <option value="2012/2013">2012/2013</option>
+                        <option value="2011/2012">2011/2012</option>
+                        <option value="2010/2011">2010/2011</option>
+                        <option value="2009/2010">2009/2010</option>
+                        <option value="2008/2009">2008/2009</option>
+                    </select>
+                    <button class="btn" onclick="getSeasonStats()">Get Stats</button>
+                </div>
+                <div id="season-stats-results"></div>
+            </div>
+
+            <div class="section">
+                <h2>High Scoring Matches</h2>
+                <div class="form-group">
+                    <label for="high-score-team">Team Name:</label>
+                    <input type="text" id="high-score-team" placeholder="e.g., FC Barcelona">
+                </div>
+                <div class="form-group">
+                    <label for="min-goals">Minimum Goals:</label>
+                    <input type="number" id="min-goals" value="3" min="1" max="10">
+                    <button class="btn" onclick="getHighScoringMatches()">Search</button>
+                </div>
+                <div id="high-score-results"></div>
+            </div>
+
+            <div class="section">
+                <h2>Head-to-Head</h2>
+                <div class="form-group">
+                    <label for="h2h-team1">Team 1:</label>
+                    <input type="text" id="h2h-team1" placeholder="e.g., FC Barcelona">
+                </div>
+                <div class="form-group">
+                    <label for="h2h-team2">Team 2:</label>
+                    <input type="text" id="h2h-team2" placeholder="e.g., Real Madrid CF">
+                    <button class="btn" onclick="getHeadToHead()">Compare</button>
+                </div>
+                <div id="h2h-results"></div>
+            </div>
+        </div>
+
+        <!-- Players Tab -->
+        <div id="players" class="tab-content">
+            <div class="section">
+                <h2>Top Players by Rating</h2>
+                <div class="form-group">
+                    <label for="player-limit">Number of Players:</label>
+                    <input type="number" id="player-limit" value="10" min="5" max="50">
+                    <button class="btn" onclick="getTopPlayers()">Load Top Players</button>
+                </div>
+                <div id="top-players-results"></div>
+            </div>
+
+            <div class="section">
+                <h2>Player Search</h2>
+                <div class="form-group">
+                    <label for="player-name">Player Name:</label>
+                    <input type="text" id="player-name" placeholder="e.g., Lionel Messi">
+                    <button class="btn" onclick="searchPlayer()">Search Player</button>
+                </div>
+                <div id="player-results"></div>
+            </div>
+        </div>
+
+        <!-- Leagues Tab -->
+        <div id="leagues" class="tab-content">
+            <div class="section">
+                <h2>League Standings</h2>
+                <div class="form-group">
+                    <label for="league-name">League Name:</label>
+                    <select id="league-name">
+                        <option value="">Select a league...</option>
+                        <option value="Spain LIGA BBVA">Spain LIGA BBVA</option>
+                        <option value="England Premier League">England Premier League</option>
+                        <option value="Germany 1. Bundesliga">Germany 1. Bundesliga</option>
+                        <option value="Italy Serie A">Italy Serie A</option>
+                        <option value="France Ligue 1">France Ligue 1</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="standings-season">Season:</label>
+                    <select id="standings-season">
+                        <option value="2015/2016">2015/2016</option>
+                        <option value="2014/2015">2014/2015</option>
+                        <option value="2013/2014">2013/2014</option>
+                        <option value="2012/2013">2012/2013</option>
+                    </select>
+                    <button class="btn" onclick="getStandings()">Get Standings</button>
+                </div>
+                <div id="standings-results"></div>
+            </div>
+
+            <div class="section">
+                <h2>Top Teams in League</h2>
+                <div class="form-group">
+                    <label for="top-teams-league">League Name:</label>
+                    <select id="top-teams-league">
+                        <option value="">Select a league...</option>
+                        <option value="Spain LIGA BBVA">Spain LIGA BBVA</option>
+                        <option value="England Premier League">England Premier League</option>
+                        <option value="Germany 1. Bundesliga">Germany 1. Bundesliga</option>
+                        <option value="Italy Serie A">Italy Serie A</option>
+                        <option value="France Ligue 1">France Ligue 1</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="top-teams-season">Season:</label>
+                    <select id="top-teams-season">
+                        <option value="2015/2016">2015/2016</option>
+                        <option value="2014/2015">2014/2015</option>
+                        <option value="2013/2014">2013/2014</option>
+                    </select>
+                    <button class="btn" onclick="getTopTeams()">Get Top 5</button>
+                </div>
+                <div id="top-teams-results"></div>
+            </div>
+        </div>
+
+        <!-- API Documentation Tab -->
+        <div id="api" class="tab-content">
+            <div class="section">
+                <h2>API Documentation</h2>
+                <p>This dashboard is powered by a RESTful API. Below are the available endpoints:</p>
+                
+                <div class="api-endpoint">
+                    <h3>GET /api/team/&lt;team_name&gt;</h3>
+                    <p>Get team information and recent match results</p>
+                    <code>Example: /api/team/FC Barcelona</code>
+                </div>
+
+                <div class="api-endpoint">
+                    <h3>GET /api/player/&lt;player_name&gt;</h3>
+                    <p>Get player stats and attributes</p>
+                    <code>Example: /api/player/Lionel Messi</code>
+                </div>
+
+                <div class="api-endpoint">
+                    <h3>GET /api/league/&lt;league_name&gt;/top-teams</h3>
+                    <p>Get top 5 teams in a league for a season</p>
+                    <code>Example: /api/league/Spain LIGA BBVA/top-teams?season=2015/2016</code>
+                </div>
+
+                <div class="api-endpoint">
+                    <h3>GET /api/matches/high-scoring</h3>
+                    <p>Find matches where a team scored 3+ goals</p>
+                    <code>Example: /api/matches/high-scoring?team=FC Barcelona&min_goals=3</code>
+                </div>
+
+                <div class="api-endpoint">
+                    <h3>GET /api/leagues/stats</h3>
+                    <p>Get statistics for all leagues</p>
+                    <code>Example: /api/leagues/stats</code>
+                </div>
+
+                <div class="api-endpoint">
+                    <h3>GET /api/scorelines/common</h3>
+                    <p>Get most common scorelines</p>
+                    <code>Example: /api/scorelines/common?limit=10</code>
+                </div>
+
+                <button class="btn" onclick="loadAPIInfo()">Load Full API Documentation</button>
+                <div id="api-docs"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
