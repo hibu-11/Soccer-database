@@ -22,13 +22,9 @@ A comprehensive NoSQL database project analyzing European soccer data (2008-2016
    - Download the SQLite database file (`database.sqlite`)
    - Place it in the `data/` folder
 
-4. **Start MongoDB**
+4. **Start MongoDB** (use the docker)
    ```bash
-   # On Linux/Mac
-   mongod
-   
-   # On Windows
-   # MongoDB should be running as a service
+   docker-compose up -d
    ```
 
 5. **Load data into MongoDB**
@@ -49,7 +45,7 @@ A comprehensive NoSQL database project analyzing European soccer data (2008-2016
    ```
 
 7. **Access the dashboard**
-   - Open your browser to: http://localhost:5000
+   - Open your browser to: http://localhost:5001
    - Explore the interactive dashboard!
 
 ## Implemented Queries
